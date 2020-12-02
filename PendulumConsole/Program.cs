@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Threading;
@@ -8,12 +9,19 @@ namespace PendulumConsole
     class Program
     {
         private static SqlConnection connection;
+        
         static void Main()
         {
             InitDbConnection();
+
+            connection.Open();
             CreateTables();
             ProcessDataFile();
-            Console.ReadLine();
+
+            connection.Close();
+
+            Console.WriteLine("Nyomj meg egy gombot a kilépéshez");
+            Console.ReadKey();
         }
 
 
@@ -23,12 +31,9 @@ namespace PendulumConsole
             Console.Write("Írja be a beolvasni kívánt fájl elérési útvonalát a fenti példa alapján: ");
             string path = Console.ReadLine();
 
-            StreamReader sr;
-            
             try
             {
-                connection.Open();
-                sr = new StreamReader(path);
+                var sr = new StreamReader(path);
 
                 Console.Clear();
                 Console.WriteLine("A feldolgozás folyamatban... kérem várjon");
@@ -83,14 +88,12 @@ namespace PendulumConsole
                         }
 
                         cmd?.ExecuteNonQuery();
-                        //
-
                     }
                 }
 
-                connection.Close();
-                Thread.Sleep(2000);
                 Console.WriteLine("A feldolgozás befejeződött!");
+
+                
             }
             catch (Exception e)
             {
@@ -104,7 +107,8 @@ namespace PendulumConsole
             {
                 connection = new SqlConnection(@"Server = (localdb)\MSSQLLocalDB;
                             AttachDbFilename=|DataDirectory|\Resources\music.mdf;
-                            
+                            Integrated Security=True;
+                            Connect Timeout=5
                             ");
             }
             catch (Exception e)
@@ -122,15 +126,12 @@ namespace PendulumConsole
                 
                 string SqlString = File.ReadAllText("init.sql");
 
-                connection.Open();
-
                 SqlCommand command = new SqlCommand(SqlString, connection);
                 command.ExecuteNonQuery();
 
                 Console.WriteLine($"Táblák létrehozva!");
 
-                connection.Close();
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
                 Console.Clear();
             }
             catch (Exception e)
