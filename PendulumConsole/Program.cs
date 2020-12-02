@@ -2,6 +2,9 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Net.Mime;
+using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Threading;
 
 namespace PendulumConsole
@@ -123,8 +126,8 @@ namespace PendulumConsole
             try
             {
                 Console.WriteLine("Táblák létrehozása...");
-                
-                string SqlString = File.ReadAllText("init.sql");
+
+                string SqlString = GetSQLString();
 
                 SqlCommand command = new SqlCommand(SqlString, connection);
                 command.ExecuteNonQuery();
@@ -161,6 +164,27 @@ namespace PendulumConsole
         static bool LineIsAttribute(string line)
         {
             return line.Contains("[albums]") || line.Contains("[tracks]");
+        }
+
+        static string GetSQLString()
+        {
+            return @"DROP TABLE IF EXISTS Tracks;
+                    DROP TABLE IF EXISTS Albums;
+
+                    CREATE TABLE Albums (
+	                    id VARCHAR(4) PRIMARY KEY,
+	                    artist VARCHAR(255) NOT NULL,
+	                    title VARCHAR(255) NOT NULL,
+	                    release DATE
+                    );
+
+                    CREATE TABLE Tracks (
+	                    id INT PRIMARY KEY IDENTITY,
+	                    title VARCHAR(255) NOT NULL,
+	                    length TIME,
+	                    album VARCHAR(4) FOREIGN KEY REFERENCES Albums(Id),
+	                    url VARCHAR(30) 
+                    );";
         }
     }
 }
