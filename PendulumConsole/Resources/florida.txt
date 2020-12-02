@@ -1,0 +1,24 @@
+[albums]
+mail;Flo Rida;Mail on Sunday;2008-03-18
+rots;Flo Rida;R.O.O.T.S.;2009-03-31
+oof1;Flo Rida;Only One Flo (Part 1);2010-11-24
+wion;Flo Rida;Wild Ones;2012-07-03
+[tracks]
+Low;3:50;mail;null
+Elevator;3:50;mail;null
+In the Ayer;3:40;mail;null
+Right Round;3:27;rots;null
+Shone;4:25;rots;null
+Sugar;4:12;rots;null
+Jump;3:28;rots;null
+Be on You;4:12;rots;null
+Available;3:34;rots;null
+Club Can't Handle Me;3:52;oof1;null
+Turn Around (5, 4, 3, 2, 1);3:21;oof1;null
+Who Dat Girl;3:19;oof1;null
+Good Feeling;4:07;wion;null
+Wild Ones;3:53;wion;null
+Whistle;3:45;wion;null
+I Cry;3:42;wion;null
+Sweet Spot;3:48;wion;null
+Let It Roll;3:14;wion;null
