@@ -27,6 +27,7 @@ namespace PendulumConsole
             
             try
             {
+                connection.Open();
                 sr = new StreamReader(path);
 
                 Console.Clear();
@@ -87,6 +88,7 @@ namespace PendulumConsole
                     }
                 }
 
+                connection.Close();
                 Thread.Sleep(2000);
                 Console.WriteLine("A feldolgozás befejeződött!");
             }
@@ -100,7 +102,10 @@ namespace PendulumConsole
         {
             try
             {
-                connection = new SqlConnection(@"Server = (localdb)\MSSQLLocalDB; Database = music; Trusted_Connection = True;");
+                connection = new SqlConnection(@"Server = (localdb)\MSSQLLocalDB;
+                            AttachDbFilename=|DataDirectory|\Resources\music.mdf;
+                            
+                            ");
             }
             catch (Exception e)
             {
@@ -124,6 +129,7 @@ namespace PendulumConsole
 
                 Console.WriteLine($"Táblák létrehozva!");
 
+                connection.Close();
                 Thread.Sleep(2000);
                 Console.Clear();
             }
@@ -137,6 +143,8 @@ namespace PendulumConsole
 
         static void CloseProgram(int closeTime, Exception e)
         {
+            connection.Close();
+
             Console.WriteLine();
             Console.WriteLine("[ H I B A ]");
             Console.WriteLine("A program hibát észlelt a futáskor:");
