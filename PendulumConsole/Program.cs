@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -12,7 +14,7 @@ namespace PendulumConsole
     class Program
     {
         private static SqlConnection connection;
-        
+
         static void Main()
         {
             InitDbConnection();
@@ -55,19 +57,19 @@ namespace PendulumConsole
 
                     if (!LineIsAttribute(dataLine))
                     {
-                        SqlCommand cmd = null;
+                        SqlCommand cmd = new SqlCommand();
+                        cmd.CommandType = CommandType.Text;
+                        cmd.Connection = connection;
+                        string[] data = dataLine.Split(';');
+
                         if (currentAttribute == "[albums]")
                         {
-                            string[] data = dataLine.Split(';');
-
                             string id = data[0];
                             string artist = data[1];
                             string title = data[2];
                             DateTime release = DateTime.Parse(data[3]);
 
-
-                            string queryString = "INSERT INTO Albums (id, artist, title, release) VALUES(@id, @artist, @title, @release)";
-                            cmd = new SqlCommand(queryString, connection);
+                            cmd.CommandText = "INSERT INTO Albums (id, artist, title, release) VALUES(@id, @artist, @title, @release)";
                             cmd.Parameters.AddWithValue("@id", id);
                             cmd.Parameters.AddWithValue("@artist", artist);
                             cmd.Parameters.AddWithValue("@title", title);
@@ -75,15 +77,12 @@ namespace PendulumConsole
                         }
                         else if (currentAttribute == "[tracks]")
                         {
-                            string[] data = dataLine.Split(';');
-
                             string title = data[0];
                             TimeSpan length = TimeSpan.Parse(data[1]);
                             string albumId = data[2];
                             string tinyURL = data[3];
 
-                            string queryString = "INSERT INTO Tracks (title, length, album, url) VALUES(@title, @length, @album, @url)";
-                            cmd = new SqlCommand(queryString, connection);
+                            cmd.CommandText = "INSERT INTO Albums (id, artist, title, release) VALUES(@id, @artist, @title, @release)";
                             cmd.Parameters.AddWithValue("@title", title);
                             cmd.Parameters.AddWithValue("@length", length);
                             cmd.Parameters.AddWithValue("@album", albumId);
@@ -123,16 +122,18 @@ namespace PendulumConsole
 
         static void CreateTables()
         {
+            Console.WriteLine("Szeretné törölni az elöző adatokat? (Y/N): ");
+            var key = Console.ReadKey();
+
+            Console.WriteLine("");
             try
             {
-                Console.WriteLine("Táblák létrehozása...");
+                Console.WriteLine("Szükséges SQL műveletek végrehajtása...");
 
-                string SqlString = GetSQLString();
+                string SqlString = GetSQLString(key.Key == ConsoleKey.Y);
 
                 SqlCommand command = new SqlCommand(SqlString, connection);
                 command.ExecuteNonQuery();
-
-                Console.WriteLine($"Táblák létrehozva!");
 
                 Thread.Sleep(1000);
                 Console.Clear();
@@ -142,7 +143,6 @@ namespace PendulumConsole
                 CloseProgram(10, e);
                 throw;
             }
-            
         }
 
         static void CloseProgram(int closeTime, Exception e)
@@ -166,9 +166,11 @@ namespace PendulumConsole
             return line.Contains("[albums]") || line.Contains("[tracks]");
         }
 
-        static string GetSQLString()
+        static string GetSQLString(bool delete = false)
         {
-            return @"DROP TABLE IF EXISTS Tracks;
+            if (delete)
+            {
+                return @"DROP TABLE IF EXISTS Tracks;
                     DROP TABLE IF EXISTS Albums;
 
                     CREATE TABLE Albums (
@@ -185,6 +187,27 @@ namespace PendulumConsole
 	                    album VARCHAR(4) FOREIGN KEY REFERENCES Albums(Id),
 	                    url VARCHAR(30) 
                     );";
+            }
+            else
+            {
+                return @"
+
+                    IF OBJECT_ID('Albums', 'U') IS NULL CREATE TABLE Albums (
+	                    id VARCHAR(4) PRIMARY KEY,
+	                    artist VARCHAR(255) NOT NULL,
+	                    title VARCHAR(255) NOT NULL,
+	                    release DATE
+                    );
+
+                    IF OBJECT_ID('Tracks', 'U') IS NULL CREATE TABLE Tracks (
+	                    id INT PRIMARY KEY IDENTITY,
+	                    title VARCHAR(255) NOT NULL,
+	                    length TIME,
+	                    album VARCHAR(4) FOREIGN KEY REFERENCES Albums(Id),
+	                    url VARCHAR(30) 
+                    );";
+            }
+            
         }
     }
 }
